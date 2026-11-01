@@ -1,0 +1,297 @@
+/* =====================================================================
+   ОФОРМЛЕНИЕ  (style.css)
+   Идея: страница похожа на их фотосессию — бумажный бежевый фон,
+   тёмно-коричневые заголовки с засечками и одна оранжевая «печать»
+   (как медальон TORTE на каждом торте) — в ней живёт цена.
+   Цвета --accent / --ink / --paper app.js берёт из config.js (theme).
+   ===================================================================== */
+
+:root {
+  --paper:   #F3ECE4;   /* фон, как бумага на их фото */
+  --surface: #FFFCF8;   /* карточки шагов */
+  --ink:     #3A1F15;   /* тёмно-коричневый текст */
+  --muted:   #8B6F62;   /* второстепенный текст */
+  --line:    #E5D7CA;   /* тонкие линии */
+  --accent:  #F26B21;   /* оранжевая печать */
+
+  --serif: "Fraunces", Georgia, "Times New Roman", serif;
+  --sans:  "Manrope", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+
+  --r-lg: 28px;         /* большие блоки */
+  --r-md: 18px;         /* фото и карточки */
+  --r-sm: 12px;         /* поля */
+  --bar-h: 92px;        /* высота нижней панели */
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.5;
+  padding-bottom: calc(var(--bar-h) + env(safe-area-inset-bottom));
+}
+
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- Верхняя панель ---------- */
+.appbar {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px;
+  padding-top: calc(10px + env(safe-area-inset-top));
+  background: color-mix(in srgb, var(--paper) 85%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+#logo { width: 36px; height: 36px; border-radius: 50%; }
+#company-name { font-family: var(--serif); font-weight: 800; font-size: 20px; letter-spacing: .04em; flex: 1; }
+
+#lang-switch { display: flex; background: var(--surface); border-radius: 999px; padding: 3px; border: 1px solid var(--line); }
+#lang-switch button {
+  border: 0; background: transparent; border-radius: 999px;
+  padding: 5px 11px; font-size: 13px; font-weight: 700; color: var(--muted);
+}
+#lang-switch button.active { background: var(--ink); color: var(--paper); }
+
+/* ---------- Сетка: витрина + шаги ---------- */
+.layout { max-width: 1120px; margin: 0 auto; }
+
+@media (min-width: 960px) {
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 40px;
+    padding: 8px 24px 0;
+  }
+  .showcase { position: sticky; top: 72px; align-self: start; }
+}
+
+/* ---------- Витрина выбранного торта ---------- */
+.showcase { padding: 4px 16px 0; }
+.hero {
+  margin: 0;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: #E9DFD4;
+  aspect-ratio: 16 / 11;
+}
+.hero img { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity .25s; }
+.hero img.swap { opacity: 0; }
+
+.hero-text { padding: 18px 4px 4px; }
+#hero-name {
+  font-family: var(--serif);
+  font-weight: 800;
+  font-size: clamp(40px, 11vw, 64px);
+  line-height: .95;
+  letter-spacing: -.02em;
+  margin: 0 0 10px;
+  font-variation-settings: "opsz" 144;
+}
+#hero-about { margin: 0; color: var(--muted); max-width: 46ch; }
+
+/* ---------- Шаги ---------- */
+.steps { padding: 8px 16px 24px; }
+.step {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  padding: 20px 18px 22px;
+  margin-top: 14px;
+}
+.step h2 {
+  display: flex; align-items: center; gap: 10px;
+  margin: 0 0 16px;
+  font-family: var(--serif); font-weight: 600; font-size: 22px; letter-spacing: -.01em;
+}
+.num {
+  flex: none;
+  width: 28px; height: 28px; border-radius: 50%;
+  display: grid; place-items: center;
+  border: 1.5px solid var(--ink);
+  font-size: 14px; font-weight: 600;
+}
+
+/* ---------- Шаг 1: лента тортов ---------- */
+.cake-strip {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 152px;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 18px;             /* карточка «прилипает» с отступом, а не к самому краю */
+  margin: 0 -18px; padding: 6px 18px 8px;   /* лента доходит до краёв карточки */
+  scrollbar-width: none;
+}
+.cake-strip::-webkit-scrollbar { display: none; }
+@media (min-width: 960px) {
+  .cake-strip { grid-auto-flow: row; grid-template-columns: repeat(5, 1fr); grid-auto-columns: auto; gap: 16px 10px; overflow: visible; margin: 0; padding: 6px 4px; }
+}
+
+.cake {
+  scroll-snap-align: start;
+  border: 0; background: none; padding: 0; text-align: left;
+  /* фото всегда сверху, даже если название в две строки */
+  display: flex; flex-direction: column; justify-content: flex-start; align-self: start;
+}
+.cake .pic {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 10;          /* тот же формат, что у фото: торт виден целиком */
+  border-radius: var(--r-md);
+  overflow: hidden;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition: outline-color .15s;
+}
+.cake img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cake .name { display: block; font-weight: 700; font-size: 14px; margin-top: 8px; line-height: 1.25; }
+.cake .kg { display: block; font-size: 13px; color: var(--muted); }
+.cake[aria-pressed="true"] .pic { outline-color: var(--accent); }
+/* маленькая печать на выбранном торте */
+.cake[aria-pressed="true"] .pic::after {
+  content: "✓";
+  position: absolute; top: 6px; right: 6px;
+  width: 24px; height: 24px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--accent); color: #fff; font-size: 13px; font-weight: 700;
+}
+
+/* ---------- Шаг 2: вес — круги растут вместе с тортом ---------- */
+.size-scale {
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 6px;
+}
+.size {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  border: 0; background: none; padding: 4px 0;
+}
+.size .disc {
+  border-radius: 50%;
+  border: 1.5px solid var(--ink);
+  transition: background .15s, border-color .15s, transform .15s;
+}
+.size b { font-size: 15px; }
+.size small { font-size: 12px; color: var(--muted); margin-top: -6px; text-align: center; }
+.size[aria-pressed="true"] .disc { background: var(--accent); border-color: var(--accent); transform: scale(1.06); }
+
+/* ---------- Шаг 3: дизайн — переключатель из двух ---------- */
+.segmented { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.segmented button {
+  border: 1.5px solid var(--line); background: transparent;
+  border-radius: var(--r-md);
+  padding: 14px; text-align: left;
+}
+.segmented button b { display: block; font-size: 15px; line-height: 1.3; }
+.segmented button small { display: block; color: var(--muted); font-size: 13px; margin-top: 4px; }
+.segmented button[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+.segmented button[aria-pressed="true"] small { color: color-mix(in srgb, var(--paper) 75%, transparent); }
+
+/* ---------- Шаг 4: поля ---------- */
+.field { margin-top: 14px; }
+.field:first-of-type { margin-top: 0; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.field-row .field { margin-top: 0; }
+label, .label { display: block; font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 6px; }
+input {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-sm);
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  min-height: 50px;
+}
+input:focus { outline: none; border-color: var(--ink); }
+
+.branches { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.branch {
+  border: 1.5px solid var(--line); background: #fff;
+  border-radius: var(--r-sm);
+  padding: 11px 12px; text-align: left;
+}
+.branch b { display: block; font-size: 14px; line-height: 1.3; }
+.branch small { color: var(--muted); font-size: 12px; }
+.branch[aria-checked="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+
+/* ---------- Шаг 5: чек ---------- */
+.receipt { font-size: 15px; }
+.receipt div {
+  display: flex; justify-content: space-between; gap: 16px;
+  padding: 9px 0;
+  border-bottom: 1.5px dashed var(--line);
+}
+.receipt span:first-child { color: var(--muted); }
+.receipt span:last-child { text-align: right; font-weight: 600; }
+.note { font-size: 13px; color: var(--muted); margin: 12px 0 0; }
+.error { color: #B3261E; font-weight: 600; font-size: 14px; margin: 10px 0 0; min-height: 1em; }
+
+/* ---------- Нижняя панель ---------- */
+.orderbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+}
+.orderbar-inner {
+  max-width: 1120px; margin: 0 auto;
+  display: flex; align-items: center; gap: 14px;
+}
+
+/* Печать с ценой */
+.seal {
+  flex: none;
+  width: 76px; height: 76px; margin-top: -34px;   /* выступает над панелью */
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 40%, transparent);
+  position: relative;
+}
+.seal::before {          /* внутреннее кольцо, как у сургучной печати */
+  content: ""; position: absolute; inset: 6px;
+  border-radius: 50%;
+  border: 1.5px solid color-mix(in srgb, #fff 55%, transparent);
+}
+.seal-label { font-size: 10px; line-height: 1; opacity: .85; margin-bottom: 2px; }
+#total { line-height: 1.1; }
+#total { font-family: var(--serif); font-weight: 800; font-size: 19px; letter-spacing: -.01em; }
+.seal.stamp { animation: stamp .35s ease-out; }
+@keyframes stamp {
+  0%   { transform: scale(1.18) rotate(-8deg); }
+  60%  { transform: scale(.96) rotate(2deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+.orderbar-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.orderbar-text .note { margin: 0; }
+#total-line { font-weight: 700; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+#send-btn {
+  flex: none;
+  display: flex; align-items: center; gap: 8px;
+  border: 0; border-radius: 999px;
+  background: var(--ink); color: var(--paper);
+  padding: 14px 18px;
+  font-weight: 700; font-size: 15px;
+}
+#send-btn svg { width: 20px; height: 20px; color: #25D366; }
+
+/* Телефон: подпись уже в печати, кнопка занимает всё оставшееся место */
+@media (max-width: 560px) {
+  .orderbar-text { display: none; }
+  #send-btn { flex: 1; justify-content: center; }
+}
+
+/* Кто отключил анимации в системе — без анимаций */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
