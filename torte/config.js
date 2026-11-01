@@ -11,7 +11,7 @@ const CONFIG = {
   company: {
     name: "TORTE",
     instagram: "torte.az",
-    whatsapp: "994557048150",      // номер без "+" и пробелов — сюда уходит заявка
+    whatsapp: "994514444468",      // номер без "+" и пробелов — сюда уходит заявка
     logo: "images/logo.png",       // логотип (положим файл позже)
     currency: "₼",
   },
