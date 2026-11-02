@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Конструктор сайтов</title>
+  <link rel="stylesheet" href="builder.css">
+</head>
+<body>
+
+  <!-- ===================== ВЕРХНЯЯ ПАНЕЛЬ ===================== -->
+  <header class="top">
+    <div class="brand">Конструктор</div>
+    <input id="project-title" class="project-title" placeholder="Название проекта" aria-label="Название проекта">
+    <div class="top-actions">
+      <button id="btn-new" class="ghost">Новый</button>
+      <label class="ghost file-btn">Открыть проект<input type="file" id="open-file" accept=".json,application/json" hidden></label>
+      <button id="btn-save" class="ghost">Сохранить проект</button>
+      <button id="btn-export" class="primary">Скачать сайт (ZIP)</button>
+    </div>
+  </header>
+
+  <div class="workspace">
+
+    <!-- ===================== ФОРМА НАСТРОЕК ===================== -->
+    <aside class="panel" id="panel">
+
+      <details class="group" open>
+        <summary>Стиль сайта</summary>
+        <div class="styles" id="style-list"></div>
+        <p class="hint">Стиль меняет вид страницы целиком. Цвета и шрифты подставятся из стиля, ниже их можно подправить под компанию.</p>
+      </details>
+
+      <details class="group" open>
+        <summary>Компания</summary>
+        <div class="grid2">
+          <label>Название <input data-path="company.name"></label>
+          <label>Валюта <input data-path="company.currency" placeholder="₼"></label>
+          <label>WhatsApp (только цифры) <input data-path="company.whatsapp" placeholder="994501234567" inputmode="numeric"></label>
+          <label>Instagram <input data-path="company.instagram" placeholder="torte.az"></label>
+        </div>
+        <label>Папка сайта (будет в адресе) <input data-path="meta.slug" placeholder="torte"></label>
+        <p class="hint">Адрес будет: eldes1gn.github.io/demo/<b id="slug-preview">torte</b>/</p>
+      </details>
+
+      <details class="group" open>
+        <summary>Логотип и иконка</summary>
+        <div class="logo-row">
+          <img id="logo-preview" alt="">
+          <div>
+            <label class="ghost file-btn">Загрузить логотип<input type="file" id="logo-file" accept="image/*" hidden></label>
+            <button id="logo-remove" class="link">Убрать</button>
+            <p class="hint">Лучше квадратный PNG. Из него сами сделаются иконки приложения для телефона.</p>
+          </div>
+        </div>
+      </details>
+
+      <details class="group" open>
+        <summary>Цвета и шрифты</summary>
+        <div class="grid3">
+          <label>Акцент (печать, выбор) <input type="color" data-path="theme.accent"></label>
+          <label>Текст <input type="color" data-path="theme.text"></label>
+          <label>Фон <input type="color" data-path="theme.background"></label>
+        </div>
+        <div class="grid2">
+          <label>Шрифт заголовков <select data-path="fonts.heading" id="font-heading"></select></label>
+          <label>Шрифт текста <select data-path="fonts.body" id="font-body"></select></label>
+        </div>
+        <p class="hint">После смены шрифта проверь в предпросмотре букву «ə»: она должна быть того же шрифта, что и остальные.</p>
+      </details>
+
+      <details class="group">
+        <summary>Языки и шаги</summary>
+        <div class="checks" id="lang-checks"></div>
+        <label>Язык при открытии <select data-path="defaultLang" id="default-lang"></select></label>
+        <div class="checks">
+          <label class="check"><input type="checkbox" data-path="features.size"> Шаг «Вес»</label>
+          <label class="check"><input type="checkbox" data-path="features.design"> Шаг «Дизайн»</label>
+          <label class="check"><input type="checkbox" data-path="features.inscription"> Поле «Надпись»</label>
+          <label class="check"><input type="checkbox" data-path="features.branches"> Выбор филиала</label>
+        </div>
+        <p class="hint">Если выключить «Вес», цена товара считается за штуку.</p>
+        <div class="grid2">
+          <label>Заказ минимум за (дней) <input type="number" min="0" data-path="order.minDaysAhead"></label>
+          <label>Надпись до (символов) <input type="number" min="1" data-path="order.inscriptionMaxLength"></label>
+        </div>
+      </details>
+
+      <details class="group" open>
+        <summary>Товары <span class="count" id="count-cakes"></span></summary>
+        <div id="list-cakes"></div>
+        <button class="add" data-add="cakes">+ Добавить товар</button>
+      </details>
+
+      <details class="group">
+        <summary>Веса <span class="count" id="count-sizes"></span></summary>
+        <div id="list-sizes"></div>
+        <button class="add" data-add="sizes">+ Добавить вес</button>
+      </details>
+
+      <details class="group">
+        <summary>Варианты дизайна <span class="count" id="count-designs"></span></summary>
+        <div id="list-designs"></div>
+        <button class="add" data-add="designs">+ Добавить вариант</button>
+      </details>
+
+      <details class="group">
+        <summary>Филиалы <span class="count" id="count-branches"></span></summary>
+        <div id="list-branches"></div>
+        <button class="add" data-add="branches">+ Добавить филиал</button>
+      </details>
+
+      <details class="group">
+        <summary>Тексты на странице</summary>
+        <p class="hint">Пустое поле = текст по умолчанию (он виден серым). Меняй только то, что нужно.</p>
+        <div id="texts"></div>
+      </details>
+
+      <details class="group">
+        <summary>Импорт готового сайта</summary>
+        <p class="hint">Вставь адрес сайта, сделанного этим конструктором, например <code>../torte/</code> или полный адрес. Конструктор заберёт настройки и фото, и его можно будет править дальше. Работает, когда конструктор открыт на твоём GitHub.</p>
+        <div class="row">
+          <input id="import-url" placeholder="../torte/">
+          <button id="btn-import" class="ghost">Импортировать</button>
+        </div>
+      </details>
+
+    </aside>
+
+    <!-- ===================== ПРЕДПРОСМОТР ===================== -->
+    <section class="preview">
+      <div class="preview-bar">
+        <div class="seg" role="group" aria-label="Размер предпросмотра">
+          <button data-view="mobile" class="on">Телефон</button>
+          <button data-view="desktop">Компьютер</button>
+        </div>
+        <span id="status" class="status"></span>
+      </div>
+      <div class="stage" id="stage">
+        <iframe id="frame" title="Предпросмотр сайта"></iframe>
+      </div>
+    </section>
+  </div>
+
+  <div id="toast" class="toast" role="status"></div>
+
+  <script src="jszip.min.js"></script>
+  <script src="templates.js"></script>
+  <script src="builder.js"></script>
+</body>
+</html>
