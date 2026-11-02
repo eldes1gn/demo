@@ -4,12 +4,13 @@
 //  Шаблон сайта лежит в templates.js (копия папки templates/cake).
 // =====================================================================
 
-const TPL = window.TEMPLATES.cake;
+// Шаблон выбранного проекта (P.template); по умолчанию — пошаговый «cake»
+const tpl = () => window.TEMPLATES[P.template] || window.TEMPLATES.cake;
 const STORE_KEY = "builder.project.v1";
 
 // Тексты по умолчанию берём прямо из app.js шаблона, чтобы не дублировать
 const DEFAULT_TEXTS = (() => {
-  const src = TPL["app.js"];
+  const src = window.TEMPLATES.menu["core.js"];   // полный список текстов — в ядре
   const start = src.indexOf("const DEFAULT_TEXTS = ") + "const DEFAULT_TEXTS = ".length;
   const end = src.indexOf("\n};", start) + 2;
   return new Function("return " + src.slice(start, end))();
@@ -24,6 +25,21 @@ const TEXT_LABELS = {
   sCake: "Чек: товар", sSize: "Чек: вес", sDesign: "Чек: дизайн", sText: "Чек: надпись", sDate: "Чек: дата",
   sBranch: "Чек: филиал", sName: "Чек: имя", need: "Ошибка «заполните»",
   msgHello: "Заявка: первая строка", msgTotal: "Заявка: цена", msgNoText: "Заявка: «без надписи»",
+  orderBtn: "Кнопка «Заказать»", close: "Кнопка «Закрыть»", menuTitle: "Заголовок списка товаров", swipeHint: "Сторис: подсказка «листайте»",
+  heroTitle: "Лендинг/Меню: большой заголовок", heroText: "Лендинг/Меню: текст под заголовком",
+  aboutTitle: "Лендинг: «О нас» заголовок", aboutText: "Лендинг: «О нас» текст",
+  howTitle: "Лендинг: «Как заказать»", how1: "Лендинг: шаг 1", how2: "Лендинг: шаг 2", how3: "Лендинг: шаг 3",
+  branchesTitle: "Заголовок «Филиалы»", mapLink: "Ссылка «на карте»", contactsTitle: "Заголовок «Контакты»",
+  formTitle: "Форма: заголовок", formText: "Форма: текст под заголовком", product: "Форма: поле «Товар»",
+};
+
+// Шаблоны: разное устройство страницы и путь клиента
+const TEMPLATES_INFO = {
+  cake:    { name: "Пошаговый",      about: "Большое фото, лента товаров, шаги по порядку, цена в печати" },
+  menu:    { name: "Меню-витрина",   about: "Заголовок, сетка карточек, заказ во всплывающем окне" },
+  stories: { name: "Сторис",         about: "Каждый товар на весь экран, листается вверх, как в Instagram" },
+  landing: { name: "Сайт-лендинг",   about: "Баннер, о нас, товары, как заказать, филиалы на карте, контакты" },
+  form:    { name: "Быстрая форма",  about: "Одна короткая анкета со списками и итоговой ценой" },
 };
 
 // Стили страницы: у каждого свой макет и подходящие цвета и шрифты
@@ -47,6 +63,7 @@ const BODY_FONTS = ["Manrope", "Inter", "Montserrat", "Nunito", "Rubik", "Roboto
 function blankProject() {
   return {
     meta: { template: "cake", version: 2, title: "Новый проект", slug: "company" },
+    template: "cake",
     style: "paper",
     company: { name: "Компания", instagram: "", whatsapp: "", currency: "₼" },
     logo: "",
@@ -190,6 +207,22 @@ function fillDefaultLang() {
   $("#default-lang").value = P.defaultLang;
 }
 
+
+// ---------- 4а. Выбор шаблона ----------
+function renderTemplates() {
+  $("#template-list").innerHTML = Object.entries(TEMPLATES_INFO).map(([id, x]) => `
+    <button class="tpl-card" data-template="${id}" aria-pressed="${(P.template || "cake") === id}">
+      <span class="tpl-icon tpl-${id}" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="meta"><b>${x.name}</b><span>${x.about}</span></span>
+    </button>`).join("");
+}
+function bindTemplates() {
+  $("#template-list").addEventListener("click", (e) => {
+    const card = e.target.closest("[data-template]"); if (!card) return;
+    P.template = card.dataset.template;
+    renderTemplates(); changed();
+  });
+}
 
 // ---------- 4б. Выбор стиля ----------
 function renderStyles() {
@@ -379,6 +412,7 @@ function buildConfig(forExport) {
   const texts = {};
   P.languages.forEach((l) => { if (P.texts[l] && Object.keys(P.texts[l]).length) texts[l] = P.texts[l]; });
   const cfg = {
+    template: P.template || "cake",
     style: P.style || "paper",
     company: { name: P.company.name, instagram: P.company.instagram, whatsapp: P.company.whatsapp,
       logo: P.logo ? (forExport ? "images/logo.png" : P.logo) : "", currency: P.company.currency || "₼" },
@@ -410,12 +444,14 @@ function renderPreview() {
   const lang = (() => { try { return frame.contentDocument.documentElement.lang; } catch { return null; } })();
   const safeScript = (s) => s.replace(/<\/script/gi, "<\\/script");
 
-  const html = TPL["index.html"]
+  const T = tpl();
+  let html = T["index.html"]
     .replace('<link rel="manifest" href="manifest.json">', "")
-    .replace('<link rel="stylesheet" href="style.css">', () => `<style>${TPL["style.css"]}</style>`)
+    .replace(/<link rel="stylesheet" href="([\w.-]+\.css)">/g, (m, f) => T[f] != null ? `<style>${T[f]}</style>` : m)
     .replace('<script src="config.js"></script>', () => `<script>${safeScript(buildConfig(false))}</script>`)
-    .replace('<script src="app.js"></script>', () =>
-      `<script>${safeScript(TPL["app.js"])}<\/script>` +
+    .replace('<script src="core.js"></script>', () => `<script>${safeScript(T["core.js"] || "")}<\/script>`);
+  html = html.replace('<script src="app.js"></script>', () =>
+      `<script>${safeScript(T["app.js"])}<\/script>` +
       `<script>window.open=function(u){parent.postMessage({type:"wa",url:u},"*")};` +
       (lang ? `try{if(document.querySelector('[data-lang="${lang}"]'))document.querySelector('[data-lang="${lang}"]').click()}catch(e){}` : "") +
       `scrollTo(0,${scrollY || 0});<\/script>`);
@@ -460,12 +496,10 @@ async function exportZip() {
   const zip = new JSZip();
   const dir = zip.folder(slug);
 
-  dir.file("index.html", TPL["index.html"]);
-  dir.file("style.css", TPL["style.css"]);
-  dir.file("app.js", TPL["app.js"]);
+  const T = tpl();
+  const files = ["./", "config.js", "manifest.json", "images/icon-192.png", "images/icon-512.png"];
+  Object.keys(T).filter((f) => f !== "sw.js").forEach((f) => { dir.file(f, T[f]); files.push(f); });
   dir.file("config.js", buildConfig(true));
-
-  const files = ["./", "index.html", "style.css", "app.js", "config.js", "manifest.json", "images/icon-192.png", "images/icon-512.png"];
   if (P.logo) { dir.file("images/logo.png", dataUrlToBytes(P.logo)); files.push("images/logo.png"); }
   P.cakes.forEach((c, i) => {
     const name = imgName(c, i);
@@ -486,7 +520,7 @@ async function exportZip() {
   }, null, 2));
 
   const version = slug + "-" + new Date().toISOString().replace(/\D/g, "").slice(0, 12);
-  dir.file("sw.js", TPL["sw.js"].replace("__VERSION__", version).replace("__FILES__", JSON.stringify(files)));
+  dir.file("sw.js", T["sw.js"].replace("__VERSION__", version).replace("__FILES__", JSON.stringify(files)));
 
   const blob = await zip.generateAsync({ type: "blob" });
   download(blob, slug + ".zip");
@@ -506,7 +540,7 @@ function loadProject(p) {
   const base = blankProject();
   P = Object.assign(base, p);
   ["meta", "company", "theme", "fonts", "features", "order", "texts"].forEach((k) => { P[k] = Object.assign({}, base[k], p[k] || {}); });
-  fillSelects(); fillFields(); renderStyles(); renderLists(); renderTexts(); changed();
+  fillSelects(); fillFields(); renderTemplates(); renderStyles(); renderLists(); renderTexts(); changed();
 }
 
 function bindProject() {
@@ -555,7 +589,7 @@ async function importSite(url) {
   p.company = Object.assign(p.company, cfg.company); delete p.company.logo;
   p.logo = cfg.company.logo ? await urlToDataUrl(url + cfg.company.logo).catch(() => "") : "";
   ["theme", "fonts", "features", "order"].forEach((k) => { if (cfg[k]) p[k] = Object.assign(p[k], cfg[k]); });
-  ["style", "defaultLang", "languages", "branches", "sizes", "designs"].forEach((k) => { if (cfg[k]) p[k] = cfg[k]; });
+  ["template", "style", "defaultLang", "languages", "branches", "sizes", "designs"].forEach((k) => { if (cfg[k]) p[k] = cfg[k]; });
   p.texts = Object.assign({ az: {}, ru: {}, en: {} }, cfg.texts || {});
   p.cakes = [];
   for (const c of cfg.cakes) {
@@ -570,6 +604,8 @@ async function importSite(url) {
 
 
 // ---------- 12. Старт ----------
+renderTemplates();
+bindTemplates();
 renderStyles();
 bindStyles();
 fillSelects();

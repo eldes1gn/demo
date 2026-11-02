@@ -128,3 +128,24 @@ label.file-btn { display: inline-block; color: var(--ink); font-size: 14px; marg
 .style-card .meta { display: block; padding: 7px 10px 9px; }
 .style-card .meta b { display: block; font-size: 13.5px; }
 .style-card .meta span { display: block; color: var(--muted); font-size: 12px; line-height: 1.35; }
+
+/* ---------- выбор шаблона ---------- */
+.tpls { display: grid; gap: 6px; margin-bottom: 8px; }
+.tpl-card { display: flex; gap: 12px; align-items: center; border: 1.5px solid var(--line); border-radius: var(--r); background: #fff; padding: 8px 10px; cursor: pointer; text-align: left; }
+.tpl-card[aria-pressed="true"] { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
+.tpl-card .meta { display: block; }
+.tpl-card .meta b { display: block; font-size: 13.5px; }
+.tpl-card .meta span { display: block; color: var(--muted); font-size: 12px; line-height: 1.35; }
+/* маленькие схемы макетов */
+.tpl-icon { flex: none; width: 34px; height: 52px; border: 1.5px solid var(--ink); border-radius: 6px; padding: 3px; display: grid; gap: 2px; }
+.tpl-icon i { display: block; background: #CFCFC8; border-radius: 2px; }
+.tpl-cake { grid-template-rows: 2fr 1fr 1fr; }
+.tpl-menu { grid-template-rows: .6fr 1fr 1fr; }
+.tpl-menu i:nth-child(2), .tpl-menu i:nth-child(3) { background: repeating-linear-gradient(90deg, #CFCFC8 0 45%, transparent 45% 55%); }
+.tpl-stories { grid-template-rows: 1fr; }
+.tpl-stories i:first-child { background: linear-gradient(to top, #6E6E68, #CFCFC8); }
+.tpl-stories i:nth-child(n+2) { display: none; }
+.tpl-landing { grid-template-rows: 1.6fr .8fr .8fr; }
+.tpl-landing i:first-child { background: #8D8D86; }
+.tpl-form { grid-template-rows: .8fr 1.6fr .5fr; }
+.tpl-form i:nth-child(2) { background: repeating-linear-gradient(to bottom, #CFCFC8 0 3px, transparent 3px 6px); }
