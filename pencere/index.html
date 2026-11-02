@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title></title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#F3ECE4">
+  <link rel="apple-touch-icon" href="images/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link id="font-link" rel="stylesheet" href="">
+  <link rel="stylesheet" href="core.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Шаблон «Сайт-лендинг»: баннер, о нас, товары, как заказать, филиалы, контакты -->
+  <header class="l-nav">
+    <div class="l-brand"><img data-company-logo alt=""><span data-company-name></span></div>
+    <div class="l-nav-right">
+      <div class="lang" data-lang-switch></div>
+      <a class="btn accent l-nav-cta" href="#menu" data-i18n="orderBtn"></a>
+    </div>
+  </header>
+
+  <section class="l-hero" id="hero">
+    <div class="l-hero-bg" id="hero-bg"></div>
+    <div class="l-hero-in">
+      <h1 data-i18n="heroTitle"></h1>
+      <p data-i18n="heroText"></p>
+      <div class="l-hero-btns">
+        <a class="btn accent" href="#menu" data-i18n="orderBtn"></a>
+        <a class="btn-wa" id="hero-wa" target="_blank" rel="noopener">WhatsApp</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="l-about">
+    <div class="l-about-text">
+      <h2 data-i18n="aboutTitle"></h2>
+      <p data-i18n="aboutText"></p>
+    </div>
+    <div class="l-collage" id="collage"></div>
+  </section>
+
+  <section class="l-menu" id="menu">
+    <h2 data-i18n="menuTitle"></h2>
+    <div class="l-grid" id="grid"></div>
+  </section>
+
+  <section class="l-how">
+    <h2 data-i18n="howTitle"></h2>
+    <ol>
+      <li><span data-i18n="how1"></span></li>
+      <li><span data-i18n="how2"></span></li>
+      <li><span data-i18n="how3"></span></li>
+    </ol>
+  </section>
+
+  <section class="l-branches" id="branches-sec">
+    <h2 data-i18n="branchesTitle"></h2>
+    <div class="l-branch-list" id="branches"></div>
+  </section>
+
+  <footer class="l-foot">
+    <h2 data-i18n="contactsTitle"></h2>
+    <div class="l-foot-links" id="contacts"></div>
+    <small>© <span data-company-name></span></small>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="core.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
