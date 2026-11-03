@@ -1,5 +1,6 @@
 /* Шаблон «Сайт-лендинг» */
 section, .l-foot { padding: 64px 20px; }
+@media (max-width: 700px) { section, .l-foot { padding: 44px 20px; } }
 section > h2, .l-foot > h2 { font-size: clamp(28px, 7vw, 44px); font-weight: 800; margin-bottom: 24px; }
 .l-about, .l-menu, .l-how, .l-branches, .l-foot { max-width: 1120px; margin: 0 auto; }
 
@@ -25,10 +26,19 @@ section > h2, .l-foot > h2 { font-size: clamp(28px, 7vw, 44px); font-weight: 800
 .l-hero p { max-width: 46ch; color: rgba(255,255,255,.85); font-size: 17px; margin: 16px 0 26px; }
 .l-hero-btns { display: flex; gap: 10px; flex-wrap: wrap; }
 .l-hero-btns a { text-decoration: none; }
+/* на телефоне (узкий высокий экран) фото не растягиваем на весь экран — иначе видна только часть торта.
+   Фото целиком сверху, текст под ним на тёмном фоне. */
+@media (max-width: 700px) and (orientation: portrait) {
+  .l-hero { min-height: 0; display: block; background: #15100C; }
+  .l-hero-bg { position: relative; inset: auto; aspect-ratio: 16 / 11; margin-top: 56px; transform: none; }
+  .l-hero-bg::after { background: linear-gradient(to top, #15100C, rgba(21,16,12,0) 45%); }
+  .l-hero-in { margin-top: -48px; padding: 0 20px 40px; }
+}
 
 /* о нас */
 .l-about { display: grid; gap: 28px; align-items: center; }
 @media (min-width: 820px) { .l-about { grid-template-columns: 1fr 1.2fr; gap: 48px; } }
+.l-about-text h2 { margin-bottom: 14px; }
 .l-about-text p { font-size: 18px; color: var(--muted); max-width: 42ch; margin: 0; }
 .l-collage { display: grid; grid-template-columns: 1.4fr 1fr; grid-template-rows: 1fr 1fr; gap: 10px; aspect-ratio: 4 / 3; }
 .l-collage img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--r); }
