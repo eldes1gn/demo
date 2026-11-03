@@ -1,0 +1,23 @@
+{
+  "name": "Purple Cake Boutique",
+  "short_name": "Purple Cake ",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#17111B",
+  "theme_color": "#17111B",
+  "icons": [
+    {
+      "src": "images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
