@@ -1,0 +1,78 @@
+/* Шаблон «Калькулятор услуг» */
+body { padding-bottom: 96px; }
+.c-top { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.c-brand { display: flex; align-items: center; gap: 10px; font-family: var(--serif); font-weight: 800; font-size: 18px; }
+.c-brand img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; }
+.c-wrap { max-width: 640px; margin: 0 auto; padding: 0 16px; }
+
+.c-hero { padding: 30px 0 8px; }
+.c-hero h1 { font-size: clamp(30px, 8vw, 44px); font-weight: 800; }
+.c-hero p { color: var(--muted); margin: 10px 0 0; max-width: 46ch; }
+
+.c-block { margin-top: 26px; }
+.c-block h2 { display: flex; align-items: center; gap: 10px; font-size: 21px; margin-bottom: 12px; }
+.c-n { flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--ink); color: var(--paper);
+  font: 700 14px/28px var(--sans); text-align: center; }
+
+/* услуги */
+.c-services { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+.c-svc { text-align: left; background: var(--surface); border: var(--bw) solid var(--line); border-radius: var(--r); padding: 14px; display: flex; flex-direction: column; gap: 4px; }
+.c-svc b { font-size: 16px; }
+.c-svc span { font-size: 13px; color: var(--muted); line-height: 1.35; }
+.c-svc em { font-style: normal; font-weight: 700; margin-top: 6px; color: var(--accent); }
+.c-svc[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.skin-pop .c-svc[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+.skin-pop .c-svc[aria-pressed="true"] em, .skin-pop .c-svc[aria-pressed="true"] span { color: inherit; }
+
+/* площадь */
+.c-area { display: flex; align-items: center; gap: 10px; }
+.c-step { flex: none; width: 52px; height: 52px; border-radius: 50%; border: var(--bw) solid var(--line); background: var(--surface); font-size: 24px; line-height: 1; }
+.c-area-num { flex: 1; display: flex; align-items: baseline; justify-content: center; gap: 6px; background: var(--surface); border: var(--bw) solid var(--line); border-radius: var(--r); padding: 6px 12px; }
+.c-area-num input { width: 4.2ch; border: 0; background: none; font: 800 40px/1.1 var(--serif); color: var(--ink); text-align: right; padding: 0; -moz-appearance: textfield; }
+.c-area-num input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.c-area-num input:focus { outline: none; }
+.c-area-num span { font-size: 18px; color: var(--muted); font-weight: 700; }
+#c-range { width: 100%; margin-top: 14px; accent-color: var(--accent); height: 28px; }
+
+/* коэффициенты */
+.c-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.c-chip { border: var(--bw) solid var(--line); background: var(--surface); border-radius: 999px; padding: 10px 16px; font-weight: 600; display: inline-flex; gap: 6px; align-items: baseline; }
+.c-chip small { color: var(--muted); font-weight: 600; font-size: 12px; }
+.c-chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.c-chip[aria-pressed="true"] small { color: inherit; opacity: .7; }
+.skin-night .c-chip, .skin-minimal .c-chip { border-radius: var(--r-sm); }
+
+/* доп. услуги */
+.c-extras { display: grid; gap: 8px; }
+.c-extra { display: flex; align-items: center; gap: 10px; background: var(--surface); border: var(--bw) solid var(--line); border-radius: var(--r); padding: 4px 8px 4px 4px; }
+.c-extra.on { border-color: var(--ink); }
+.c-ex-name { flex: 1; display: flex; align-items: center; gap: 12px; border: 0; background: none; text-align: left; padding: 10px; }
+.c-ex-name b { display: block; font-weight: 600; }
+.c-ex-name small { color: var(--muted); font-size: 13px; }
+.c-check { flex: none; width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--line); }
+.c-extra.on .c-check { background: var(--accent); border-color: var(--accent);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-size: 16px; background-position: center; background-repeat: no-repeat; }
+.c-qty { display: flex; align-items: center; gap: 4px; }
+.c-qty button { width: 34px; height: 34px; border-radius: 50%; border: var(--bw) solid var(--line); background: var(--paper); font-size: 18px; line-height: 1; }
+.c-qty span { min-width: 2ch; text-align: center; font-weight: 700; }
+.c-extra:not(.on) .c-qty { opacity: .45; }
+
+/* данные */
+.c-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.c-wide { grid-column: 1 / -1; }
+.c-field > span { display: block; font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 6px; }
+.c-field input { width: 100%; }
+.c-note { font-size: 13px; color: var(--muted); margin: 12px 0 0; }
+@media (max-width: 420px) { .c-fields { grid-template-columns: 1fr; } }
+
+/* нижняя панель с ценой */
+.c-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: var(--surface); border-top: 1px solid var(--line); box-shadow: 0 -8px 30px rgba(0,0,0,.08); }
+.c-bar small { display: block; font-size: 12px; color: var(--muted); }
+.c-bar strong { display: block; font: 800 28px/1.05 var(--serif); }
+.c-breakdown { display: block; font-size: 12px; color: var(--muted); min-height: 1em; }
+.c-error { position: fixed; left: 16px; right: 16px; bottom: 92px; z-index: 7; margin: 0; text-align: center; color: #fff; background: #C0392B; border-radius: 12px; padding: 0 12px; font-weight: 600; font-size: 14px; }
+.c-error:not(:empty) { padding: 10px 12px; }
+@media (min-width: 700px) { .c-bar { left: 50%; right: auto; width: 640px; transform: translateX(-50%); border-radius: var(--r) var(--r) 0 0; border: 1px solid var(--line); } }
+#c-range { border: 0; padding: 0; background: none; }

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title></title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#F3ECE4">
+  <link rel="apple-touch-icon" href="images/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link id="font-link" rel="stylesheet" href="">
+  <link rel="stylesheet" href="core.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Шаблон «Калькулятор услуг»: услуга × площадь × коэффициенты + доп. услуги → заявка в WhatsApp -->
+  <header class="c-top">
+    <div class="c-brand"><img data-company-logo alt=""><span data-company-name></span></div>
+    <div class="lang" data-lang-switch></div>
+  </header>
+
+  <main class="c-wrap">
+    <section class="c-hero">
+      <h1 id="c-title"></h1>
+      <p id="c-lead"></p>
+    </section>
+
+    <section class="c-block">
+      <h2><span class="c-n">1</span><span data-i18n="cService"></span></h2>
+      <div class="c-services" id="c-services"></div>
+    </section>
+
+    <section class="c-block">
+      <h2><span class="c-n">2</span><span id="c-area-title"></span></h2>
+      <div class="c-area">
+        <button type="button" class="c-step" data-area="-5" aria-label="−">−</button>
+        <label class="c-area-num"><input id="c-area" type="number" inputmode="numeric" min="1"><span id="c-unit"></span></label>
+        <button type="button" class="c-step" data-area="5" aria-label="+">+</button>
+      </div>
+      <input id="c-range" type="range" min="10" max="300" step="1">
+    </section>
+
+    <div id="c-mods"></div>
+
+    <section class="c-block" id="c-extras-block">
+      <h2><span class="c-n" id="c-extras-n">4</span><span data-i18n="cExtras"></span></h2>
+      <div class="c-extras" id="c-extras"></div>
+    </section>
+
+    <section class="c-block">
+      <h2><span class="c-n" id="c-details-n">5</span><span data-i18n="cDetails"></span></h2>
+      <div class="c-fields">
+        <label class="c-field"><span data-i18n="date"></span><input type="date" id="c-date"></label>
+        <label class="c-field"><span data-i18n="name"></span><input id="c-name" autocomplete="given-name"></label>
+        <label class="c-field c-wide"><span data-i18n="cAddress"></span><input id="c-address" autocomplete="street-address"></label>
+      </div>
+      <p class="c-note" data-i18n="cNote"></p>
+    </section>
+  </main>
+
+  <div class="c-bar">
+    <div><small data-i18n="total"></small><strong id="c-total"></strong><span class="c-breakdown" id="c-breakdown"></span></div>
+    <button type="button" class="btn-wa" id="c-send"><span data-i18n="send"></span></button>
+  </div>
+  <p class="c-error" id="c-error" role="alert"></p>
+
+  <script src="config.js"></script>
+  <script src="core.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
