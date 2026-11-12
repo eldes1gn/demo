@@ -103,7 +103,19 @@ function blankProject() {
   };
 }
 
-let P = loadSaved() || blankProject();
+// Проект, сохранённый старой версией конструктора, дополняем недостающими полями
+function normalize(p) {
+  if (!p) return null;
+  const base = blankProject();
+  const out = Object.assign(base, p);
+  ["meta", "company", "theme", "fonts", "features", "order", "texts", "calcArea"].forEach((k) => { out[k] = Object.assign({}, base[k], p[k] || {}); });
+  ["cakes", "sizes", "designs", "branches", "services", "modifiers", "extras"].forEach((k) => { if (!Array.isArray(out[k])) out[k] = base[k]; });
+  return out;
+}
+// Каждый запуск — чистый новый проект. Старые открываются кнопкой «Открыть проект».
+let P = blankProject();
+let dirty = false;   // есть несохранённые изменения
+window.addEventListener("beforeunload", (e) => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
 
 
 // ---------- 2. Мелкие помощники ----------
@@ -167,11 +179,8 @@ let saveTimer;
 function changed(rerenderLists) {
   if (rerenderLists) renderLists();
   $("#slug-preview").textContent = P.meta.slug || "company";
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(P)); setStatus("Сохранено в браузере"); }
-    catch { setStatus("Проект большой для браузера — сохрани его кнопкой «Сохранить проект»"); }
-  }, 600);
+  dirty = true;
+  setStatus("Есть несохранённые изменения");
   schedulePreview();
 }
 function setStatus(s) { $("#status").textContent = s; }
@@ -322,7 +331,7 @@ const LISTS = {
     make: () => ({ id: uid("s"), name: {}, note: {}, price: 2, min: 0 }),
     title: (x) => (x.name && (x.name[P.languages[0]] || Object.values(x.name)[0])) || "Услуга",
     body: (x) => `<div class="grid2">
-        <label>Цена за ${esc(P.calcArea.unit || "m²")} (${esc(P.company.currency)}) <input type="number" min="0" step="0.1" data-f="price" value="${x.price}"></label>
+        <label>Цена за ${esc((P.calcArea || {}).unit || "m²")} (${esc(P.company.currency)}) <input type="number" min="0" step="0.1" data-f="price" value="${x.price}"></label>
         <label>Минимальный заказ (${esc(P.company.currency)}) <input type="number" min="0" data-f="min" value="${x.min || 0}"></label>
       </div>
       <label>Название ${langInputs(x, "name", "Название")}</label>
@@ -614,9 +623,7 @@ function download(blob, name) {
 
 // ---------- 11. Проект: новый / открыть / сохранить / импорт ----------
 function loadProject(p) {
-  const base = blankProject();
-  P = Object.assign(base, p);
-  ["meta", "company", "theme", "fonts", "features", "order", "texts", "calcArea"].forEach((k) => { P[k] = Object.assign({}, base[k], p[k] || {}); });
+  P = normalize(p);
   fillSelects(); fillFields(); renderTemplates(); renderStyles(); renderLists(); renderTexts(); changed();
 }
 
@@ -624,16 +631,20 @@ function bindProject() {
   $("#project-title").addEventListener("input", (e) => { P.meta.title = e.target.value; changed(); });
   $("#btn-new").addEventListener("click", () => {
     if (!confirmReplace()) return;
-    loadProject(blankProject()); toast("Новый проект");
+    loadProject(blankProject()); dirty = false; setStatus("Новый проект"); toast("Новый проект");
   });
   $("#btn-save").addEventListener("click", () => {
     const blob = new Blob([JSON.stringify(P)], { type: "application/json" });
     download(blob, (P.meta.slug || "project") + ".project.json");
+    dirty = false; setStatus("Проект сохранён файлом");
     toast("Проект сохранён файлом. Открыть его можно кнопкой «Открыть проект»");
+  });
+  $("#open-file").closest("label").addEventListener("click", (e) => {
+    if (e.target.id !== "open-file" && !confirmReplace()) e.preventDefault();
   });
   $("#open-file").addEventListener("change", async (e) => {
     const f = e.target.files[0]; if (!f) return;
-    try { const p = JSON.parse(await f.text()); if (!p.cakes) throw 0; loadProject(p); toast("Проект открыт"); }
+    try { const p = JSON.parse(await f.text()); if (!p.cakes) throw 0; loadProject(p); dirty = false; setStatus("Открыт: " + (p.meta && p.meta.title || f.name)); toast("Проект открыт"); }
     catch { toast("Это не файл проекта конструктора", true); }
     e.target.value = "";
   });
@@ -643,7 +654,7 @@ function bindProject() {
 
 // Предупреждение, чтобы случайно не потерять работу
 function confirmReplace() {
-  return P.cakes.length <= 1 && !P.logo ? true :
+  return !dirty ? true :
     window.confirm("Текущий проект заменится. Если он нужен — сначала нажми «Сохранить проект». Продолжить?");
 }
 
@@ -696,4 +707,6 @@ bindLogo();
 bindPreviewSwitch();
 bindProject();
 renderPreview();
-setStatus(loadSaved() ? "Открыт последний проект" : "Новый проект");
+try { localStorage.removeItem(STORE_KEY); } catch {}
+dirty = false;
+setStatus("Новый проект");
