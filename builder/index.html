@@ -79,38 +79,68 @@
         <summary>Языки и шаги</summary>
         <div class="checks" id="lang-checks"></div>
         <label>Язык при открытии <select data-path="defaultLang" id="default-lang"></select></label>
-        <div class="checks">
+        <div class="checks" data-not="calc">
           <label class="check"><input type="checkbox" data-path="features.size"> Шаг «Вес»</label>
           <label class="check"><input type="checkbox" data-path="features.design"> Шаг «Дизайн»</label>
           <label class="check"><input type="checkbox" data-path="features.inscription"> Поле «Надпись»</label>
           <label class="check"><input type="checkbox" data-path="features.branches"> Выбор филиала</label>
         </div>
-        <p class="hint">Если выключить «Вес», цена товара считается за штуку.</p>
+        <p class="hint" data-not="calc">Если выключить «Вес», цена товара считается за штуку.</p>
         <div class="grid2">
           <label>Заказ минимум за (дней) <input type="number" min="0" data-path="order.minDaysAhead"></label>
-          <label>Надпись до (символов) <input type="number" min="1" data-path="order.inscriptionMaxLength"></label>
+          <label data-not="calc">Надпись до (символов) <input type="number" min="1" data-path="order.inscriptionMaxLength"></label>
         </div>
       </details>
 
-      <details class="group" open>
+      <details class="group" open data-only="calc">
+        <summary>Калькулятор: площадь</summary>
+        <div class="grid2">
+          <label>Единица <input data-path="calcArea.unit" placeholder="m²"></label>
+          <label>Площадь по умолчанию <input type="number" min="1" data-path="calcArea.def"></label>
+          <label>Ползунок от <input type="number" min="1" data-path="calcArea.min"></label>
+          <label>Ползунок до <input type="number" min="1" data-path="calcArea.max"></label>
+        </div>
+        <p class="hint">Цена = площадь × цена услуги × опции (+%), но не меньше минимума услуги. Потом прибавляются доп. услуги.</p>
+      </details>
+
+      <details class="group" open data-only="calc">
+        <summary>Услуги <span class="count" id="count-services"></span></summary>
+        <div id="list-services"></div>
+        <button class="add" data-add="services">+ Добавить услугу</button>
+      </details>
+
+      <details class="group" open data-only="calc">
+        <summary>Опции (наценка в %) <span class="count" id="count-modifiers"></span></summary>
+        <p class="hint">Варианты через запятую, наценка — через «+». Например: <code>Mənzil, Həyət evi +15%, Ofis +10%</code>. Проценты берутся из первого языка.</p>
+        <div id="list-modifiers"></div>
+        <button class="add" data-add="modifiers">+ Добавить опцию</button>
+      </details>
+
+      <details class="group" open data-only="calc">
+        <summary>Доп. услуги <span class="count" id="count-extras"></span></summary>
+        <div id="list-extras"></div>
+        <button class="add" data-add="extras">+ Добавить доп. услугу</button>
+      </details>
+
+      <details class="group" open data-not="calc">
         <summary>Товары <span class="count" id="count-cakes"></span></summary>
         <div id="list-cakes"></div>
         <button class="add" data-add="cakes">+ Добавить товар</button>
       </details>
 
-      <details class="group">
+      <details class="group" data-not="calc">
         <summary>Веса <span class="count" id="count-sizes"></span></summary>
         <div id="list-sizes"></div>
         <button class="add" data-add="sizes">+ Добавить вес</button>
       </details>
 
-      <details class="group">
+      <details class="group" data-not="calc">
         <summary>Варианты дизайна <span class="count" id="count-designs"></span></summary>
         <div id="list-designs"></div>
         <button class="add" data-add="designs">+ Добавить вариант</button>
       </details>
 
-      <details class="group">
+      <details class="group" data-not="calc">
         <summary>Филиалы <span class="count" id="count-branches"></span></summary>
         <div id="list-branches"></div>
         <button class="add" data-add="branches">+ Добавить филиал</button>

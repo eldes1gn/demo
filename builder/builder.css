@@ -149,3 +149,7 @@ label.file-btn { display: inline-block; color: var(--ink); font-size: 14px; marg
 .tpl-landing i:first-child { background: #8D8D86; }
 .tpl-form { grid-template-rows: .8fr 1.6fr .5fr; }
 .tpl-form i:nth-child(2) { background: repeating-linear-gradient(to bottom, #CFCFC8 0 3px, transparent 3px 6px); }
+.tpl-calc { grid-template-rows: .7fr 1fr .5fr; }
+.tpl-calc i:nth-child(2) { background: repeating-linear-gradient(90deg, #CFCFC8 0 30%, transparent 30% 35%); }
+.tpl-calc i:nth-child(3) { background: #8D8D86; }
+.group > .add { width: calc(100% - 28px); }

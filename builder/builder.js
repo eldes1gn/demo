@@ -16,6 +16,14 @@ const DEFAULT_TEXTS = (() => {
   return new Function("return " + src.slice(start, end))();
 })();
 
+// Тексты калькулятора лежат в его app.js — добавляем их к общим
+(() => {
+  const src = (window.TEMPLATES.calc || {})["app.js"] || "";
+  const end = src.indexOf("const K = ");
+  if (end > 0) try { new Function("DEFAULT_TEXTS", src.slice(0, end))(DEFAULT_TEXTS); } catch (e) { console.warn(e); }
+})();
+const CALC_TEXT_KEYS = ["cTitle", "cLead", "cService", "cArea", "cExtras", "cDetails", "cAddress", "cNote", "date", "name", "total", "send", "need", "cMsgHello", "msgTotal"];
+
 // Подписи к ключам текстов — по-русски, чтобы было понятно, что где
 const TEXT_LABELS = {
   step1: "Шаг 1: заголовок", step2: "Шаг «Вес»", step3: "Шаг «Дизайн»", step4: "Шаг «Детали»", step5: "Шаг «Проверка»",
@@ -31,6 +39,9 @@ const TEXT_LABELS = {
   howTitle: "Лендинг: «Как заказать»", how1: "Лендинг: шаг 1", how2: "Лендинг: шаг 2", how3: "Лендинг: шаг 3",
   branchesTitle: "Заголовок «Филиалы»", mapLink: "Ссылка «на карте»", contactsTitle: "Заголовок «Контакты»",
   formTitle: "Форма: заголовок", formText: "Форма: текст под заголовком", product: "Форма: поле «Товар»",
+  cTitle: "Калькулятор: заголовок", cLead: "Калькулятор: текст под заголовком", cService: "Калькулятор: «Выберите услугу»",
+  cArea: "Калькулятор: «Площадь»", cExtras: "Калькулятор: «Доп. услуги»", cDetails: "Калькулятор: «Ваши данные»",
+  cAddress: "Калькулятор: поле «Адрес»", cNote: "Калькулятор: примечание к цене", cMsgHello: "Калькулятор: заявка, первая строка",
 };
 
 // Шаблоны: разное устройство страницы и путь клиента
@@ -40,6 +51,7 @@ const TEMPLATES_INFO = {
   stories: { name: "Сторис",         about: "Каждый товар на весь экран, листается вверх, как в Instagram" },
   landing: { name: "Сайт-лендинг",   about: "Баннер, о нас, товары, как заказать, филиалы на карте, контакты" },
   form:    { name: "Быстрая форма",  about: "Одна короткая анкета со списками и итоговой ценой" },
+  calc:    { name: "Калькулятор услуг", about: "Клининг, потолки, окна: услуга × площадь + опции → цена и заявка" },
 };
 
 // Стили страницы: у каждого свой макет и подходящие цвета и шрифты
@@ -81,6 +93,13 @@ function blankProject() {
     branches: [{ id: "main", name: "Filial", hours: "09:00 – 21:00" }],
     order: { minDaysAhead: 2, inscriptionMaxLength: 30 },
     texts: { az: {}, ru: {}, en: {} },
+    // для шаблона «Калькулятор услуг»
+    calcArea: { unit: "m²", min: 10, max: 300, def: 60 },
+    services: [
+      { id: "s1", name: { az: "Gündəlik təmizlik", ru: "Поддерживающая уборка" }, note: { az: "", ru: "" }, price: 1.5, min: 60 },
+    ],
+    modifiers: [{ id: "m1", name: { az: "Obyekt", ru: "Объект" }, options: { az: "Mənzil, Həyət evi +15%, Ofis +10%", ru: "Квартира, Частный дом, Офис" } }],
+    extras: [{ id: "e1", name: { az: "Pəncərə yuma", ru: "Мойка окон" }, price: 8, qty: true, per: { az: "ədəd", ru: "шт." } }],
   };
 }
 
@@ -209,7 +228,13 @@ function fillDefaultLang() {
 
 
 // ---------- 4а. Выбор шаблона ----------
+function applyTemplateVisibility() {
+  const isCalc = (P.template || "cake") === "calc";
+  $$("[data-not='calc']").forEach((el) => { el.hidden = isCalc; });
+  $$("[data-only='calc']").forEach((el) => { el.hidden = !isCalc; });
+}
 function renderTemplates() {
+  applyTemplateVisibility();
   $("#template-list").innerHTML = Object.entries(TEMPLATES_INFO).map(([id, x]) => `
     <button class="tpl-card" data-template="${id}" aria-pressed="${(P.template || "cake") === id}">
       <span class="tpl-icon tpl-${id}" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -220,7 +245,7 @@ function bindTemplates() {
   $("#template-list").addEventListener("click", (e) => {
     const card = e.target.closest("[data-template]"); if (!card) return;
     P.template = card.dataset.template;
-    renderTemplates(); changed();
+    renderTemplates(); renderTexts(); changed();
   });
 }
 
@@ -293,6 +318,32 @@ const LISTS = {
     body: (x) => `<label>Доплата (${esc(P.company.currency)}) <input type="number" min="0" data-f="extraPrice" value="${x.extraPrice}"></label>
       <label>Название ${langInputs(x, "name", "Название")}</label>`,
   },
+  services: {
+    make: () => ({ id: uid("s"), name: {}, note: {}, price: 2, min: 0 }),
+    title: (x) => (x.name && (x.name[P.languages[0]] || Object.values(x.name)[0])) || "Услуга",
+    body: (x) => `<div class="grid2">
+        <label>Цена за ${esc(P.calcArea.unit || "m²")} (${esc(P.company.currency)}) <input type="number" min="0" step="0.1" data-f="price" value="${x.price}"></label>
+        <label>Минимальный заказ (${esc(P.company.currency)}) <input type="number" min="0" data-f="min" value="${x.min || 0}"></label>
+      </div>
+      <label>Название ${langInputs(x, "name", "Название")}</label>
+      <label>Что входит ${langInputs(x, "note", "Коротко")}</label>`,
+  },
+  modifiers: {
+    make: () => ({ id: uid("m"), name: {}, options: {} }),
+    title: (x) => (x.name && (x.name[P.languages[0]] || Object.values(x.name)[0])) || "Опция",
+    body: (x) => `<label>Название ${langInputs(x, "name", "Например: Объект")}</label>
+      <label>Варианты ${langInputs(x, "options", "Вариант 1, Вариант 2 +20%")}</label>`,
+  },
+  extras: {
+    make: () => ({ id: uid("e"), name: {}, price: 10, qty: false, per: {} }),
+    title: (x) => (x.name && (x.name[P.languages[0]] || Object.values(x.name)[0])) || "Доп. услуга",
+    body: (x) => `<div class="grid2">
+        <label>Цена (${esc(P.company.currency)}) <input type="number" min="0" data-f="price" value="${x.price}"></label>
+        <label class="check" style="margin-top:22px"><input type="checkbox" data-f="qty" ${x.qty ? "checked" : ""}> Можно выбрать количество</label>
+      </div>
+      <label>Название ${langInputs(x, "name", "Название")}</label>
+      ${x.qty ? `<label>Единица ${langInputs(x, "per", "шт.")}</label>` : ""}`,
+  },
   branches: {
     make: () => ({ id: uid("b"), name: "", hours: "09:00 – 21:00" }),
     title: (x) => x.name || "Филиал",
@@ -307,6 +358,8 @@ function renderLists() {
   Object.keys(LISTS).forEach((name) => {
     const box = $("#list-" + name);
     const def = LISTS[name];
+    if (!box) return;
+    P[name] ??= blankProject()[name];
     box.innerHTML = P[name].map((x, i) =>
       `<div class="item" data-list="${name}" data-i="${i}">${itemHead(name, i, def.title(x))}${def.body(x)}</div>`).join("");
     $("#count-" + name).textContent = P[name].length;
@@ -322,7 +375,8 @@ function bindLists() {
     const x = P[item.dataset.list][+item.dataset.i];
     const el = e.target;
     if (el.dataset.f) {
-      x[el.dataset.f] = el.type === "number" ? Number(el.value) : el.value;
+      x[el.dataset.f] = el.type === "checkbox" ? el.checked : el.type === "number" ? Number(el.value) : el.value;
+      if (el.type === "checkbox") { changed(true); return; }
     } else if (el.dataset.ml) {
       x[el.dataset.ml] = Object.assign({}, x[el.dataset.ml], { [el.dataset.lang]: el.value });
     } else return;
@@ -358,7 +412,9 @@ function bindLists() {
 
 // ---------- 6. Тексты ----------
 function renderTexts() {
-  $("#texts").innerHTML = Object.keys(TEXT_LABELS).map((key) =>
+  const isCalc = P.template === "calc";
+  const keys = Object.keys(TEXT_LABELS).filter((k) => isCalc ? CALC_TEXT_KEYS.includes(k) : !k.startsWith("c") || k === "close" || k === "contactsTitle");
+  $("#texts").innerHTML = keys.map((key) =>
     `<div class="text-row"><div class="key">${TEXT_LABELS[key]}</div><div class="vals">` +
     P.languages.map((l) => `<input data-text="${key}" data-lang="${l}" value="${esc((P.texts[l] || {})[key] || "")}" placeholder="${esc((DEFAULT_TEXTS[l] || {})[key] || "")}">`).join("") +
     `</div></div>`).join("");
@@ -429,6 +485,25 @@ function buildConfig(forExport) {
     order: P.order,
     texts,
   };
+  if (cfg.template === "calc") {
+    const pct = (s) => { const m = String(s).match(/([+\-−])\s*(\d+(?:[.,]\d+)?)\s*%/); return m ? 1 + (m[1] === "+" ? 1 : -1) * parseFloat(m[2].replace(",", ".")) / 100 : 1; };
+    const clean = (s) => String(s).replace(/[+\-−]\s*\d+(?:[.,]\d+)?\s*%/, "").trim();
+    const A = P.calcArea || {};
+    cfg.calc = {
+      unit: A.unit || "m²", areaMin: Number(A.min) || 10, areaMax: Number(A.max) || 300, areaDefault: Number(A.def) || 60,
+      services: (P.services || []).map((s) => ({ id: s.id, name: s.name, note: s.note, price: Number(s.price) || 0, min: Number(s.min) || 0 })),
+      modifiers: (P.modifiers || []).map((m) => {
+        const first = String((m.options || {})[P.languages[0]] || "").split(",").map((s) => s.trim()).filter(Boolean);
+        const per = {}; P.languages.forEach((l) => { per[l] = String((m.options || {})[l] || "").split(",").map((s) => s.trim()).filter(Boolean); });
+        return { id: m.id, name: m.name, options: first.map((o, i) => {
+          const name = {}; P.languages.forEach((l) => { name[l] = clean(per[l][i] || o); });
+          return { name, k: pct(o) };
+        }) };
+      }).filter((m) => m.options.length),
+      extras: (P.extras || []).map((e) => ({ id: e.id, name: e.name, price: Number(e.price) || 0, qty: !!e.qty, per: e.per || {} })),
+    };
+    delete cfg.cakes; delete cfg.sizes; delete cfg.designs; delete cfg.branches;
+  }
   return "// Файл настроек компании. Создан конструктором — проще всего менять его там.\n" +
     "const CONFIG = " + JSON.stringify(cfg, null, 2) + ";\n";
 }
@@ -457,7 +532,7 @@ function renderPreview() {
       `scrollTo(0,${scrollY || 0});<\/script>`);
 
   frame.srcdoc = html;
-  if (!P.cakes.some((c) => c.image)) setStatus("Добавь фото хотя бы одному товару");
+  if (P.template !== "calc" && !P.cakes.some((c) => c.image)) setStatus("Добавь фото хотя бы одному товару");
 }
 
 // Кнопка WhatsApp в предпросмотре не открывает чат, а показывает текст заявки
@@ -488,7 +563,9 @@ function dataUrlToBytes(d) {
 async function exportZip() {
   const problems = [];
   if (!P.company.whatsapp || P.company.whatsapp.length < 9) problems.push("номер WhatsApp");
-  if (!P.cakes.length || P.cakes.some((c) => !c.image)) problems.push("фото у каждого товара");
+  const isCalc = P.template === "calc";
+  if (isCalc && !(P.services || []).length) problems.push("хотя бы одна услуга");
+  if (!isCalc && (!P.cakes.length || P.cakes.some((c) => !c.image))) problems.push("фото у каждого товара");
   if (problems.length) return toast("Не хватает: " + problems.join(", "), true);
   if (typeof JSZip === "undefined") return toast("Нет интернета: не загрузилась библиотека для ZIP", true);
 
@@ -501,7 +578,7 @@ async function exportZip() {
   Object.keys(T).filter((f) => f !== "sw.js").forEach((f) => { dir.file(f, T[f]); files.push(f); });
   dir.file("config.js", buildConfig(true));
   if (P.logo) { dir.file("images/logo.png", dataUrlToBytes(P.logo)); files.push("images/logo.png"); }
-  P.cakes.forEach((c, i) => {
+  if (!isCalc) P.cakes.forEach((c, i) => {
     const name = imgName(c, i);
     dir.file(name, dataUrlToBytes(c.image));
     files.push(name);
@@ -539,7 +616,7 @@ function download(blob, name) {
 function loadProject(p) {
   const base = blankProject();
   P = Object.assign(base, p);
-  ["meta", "company", "theme", "fonts", "features", "order", "texts"].forEach((k) => { P[k] = Object.assign({}, base[k], p[k] || {}); });
+  ["meta", "company", "theme", "fonts", "features", "order", "texts", "calcArea"].forEach((k) => { P[k] = Object.assign({}, base[k], p[k] || {}); });
   fillSelects(); fillFields(); renderTemplates(); renderStyles(); renderLists(); renderTexts(); changed();
 }
 
